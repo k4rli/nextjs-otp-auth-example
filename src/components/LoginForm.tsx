@@ -9,12 +9,12 @@ import { yupResolver } from "@hookform/resolvers/yup";
 
 interface ILoginForm {
   email: string;
-  pin?: string;
+  otp?: string;
 }
 
 const validation: ObjectSchema<ILoginForm> = object({
   email: string().email().required(),
-  pin: string(),
+  otp: string(),
 });
 
 const LoginForm: React.FC = () => {
@@ -24,8 +24,7 @@ const LoginForm: React.FC = () => {
   });
 
   const [isLoading, setIsLoading] = useState(false);
-  const [isPinSent, setIsPinSent] = useState(false);
-
+  const [isOTPSent, setIsOTPSent] = useState(false);
 
   const handleGenerateOTP = async ({ email }: ILoginForm): Promise<void> => {
     const response = await fetch("/api/auth/generate-otp", {
@@ -38,10 +37,10 @@ const LoginForm: React.FC = () => {
       }),
     });
     if (response.ok) {
-      setIsPinSent(true);
+      setIsOTPSent(true);
     }
   }
-  const handleVerifyOTP = async ({ email, pin }: ILoginForm): Promise<void> => {
+  const handleVerifyOTP = async ({ email, otp }: ILoginForm): Promise<void> => {
     const response = await fetch("/api/auth/verify-otp", {
       method: "POST",
       headers: {
@@ -49,7 +48,7 @@ const LoginForm: React.FC = () => {
       },
       body: JSON.stringify({
         email,
-        pin: pin!,
+        otp: otp!,
       }),
     });
     if (response.ok) {
@@ -59,7 +58,7 @@ const LoginForm: React.FC = () => {
 
   const handleLogin = async (values: ILoginForm) => {
     setIsLoading(true);
-    if (isPinSent) {
+    if (isOTPSent) {
       await handleVerifyOTP(values);
     } else {
       await handleGenerateOTP(values);
@@ -76,14 +75,14 @@ const LoginForm: React.FC = () => {
         <input
           type="email"
           placeholder="email@example.com"
-          disabled={isPinSent}
+          disabled={isOTPSent}
           {...register("email")}
         />
-        {isPinSent && (
+        {isOTPSent && (
           <input
             type="text"
             placeholder="1234"
-            {...register("pin")}
+            {...register("otp")}
           />
         )}
         <button type="submit" className="login-button" disabled={isLoading}>
@@ -91,7 +90,7 @@ const LoginForm: React.FC = () => {
             if (isLoading) {
               return "Loading...";
             }
-            if (isPinSent) {
+            if (isOTPSent) {
               return "Verify OTP";
             }
             return "Generate OTP";

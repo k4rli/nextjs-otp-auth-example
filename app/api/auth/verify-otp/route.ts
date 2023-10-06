@@ -4,13 +4,13 @@ import { SESSIONID_EXPIRATION_SECONDS, SESSION_COOKIE_NAME } from "@/auth/consta
 
 interface IVerifyOTPRequest {
   email: string;
-  pin: string;
+  otp: string;
 }
 
 export async function POST(req: NextRequest) {
-  const { email, pin } = (await req.json()) as IVerifyOTPRequest;
+  const { email, otp } = (await req.json()) as IVerifyOTPRequest;
 
-  if (await AuthStorage.isValidOTP(email, pin)) {
+  if (await AuthStorage.isValidOTP(email, otp)) {
     await AuthStorage.removeOTP(email);
 
     const sessionId = await AuthStorage.createSessionID(email);
